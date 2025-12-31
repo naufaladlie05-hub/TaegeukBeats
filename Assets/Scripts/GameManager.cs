@@ -6,6 +6,7 @@ using System.Collections;
 public class GameManager : MonoBehaviour
 {
     [Header("Setting")]
+    public HitSensor mySensor;
     public GameMenuManager menuManager;
     public float targetX = -5f;
     public float hitWindow = 1.5f;
@@ -28,6 +29,12 @@ public class GameManager : MonoBehaviour
     public float damage = 10f;
     public float heal = 2f;
 
+    [Header("Audio SFX")]
+    public AudioSource sfxSource;
+    public AudioClip hitSound;
+    public AudioClip enemyHurtSound;       
+    public AudioClip enemyHurtSoundSpecial;
+
     private bool isGameOver = false;
 
     void Start()
@@ -41,32 +48,30 @@ public class GameManager : MonoBehaviour
     {
         if (isGameOver) return;
 
-        NoteObject[] allNotes = FindObjectsOfType<NoteObject>();
-        NoteObject nearestNote = null;
-        float minDistance = Mathf.Infinity;
+        NoteObject noteToHit = mySensor.GetHittableNote(isInputF);
 
-        foreach (NoteObject note in allNotes)
+        if (noteToHit != null)
         {
-            float dist = Mathf.Abs(note.transform.position.x - targetX);
-            if (dist < minDistance)
+            HitSuccess(isInputF);
+
+            GhostBehavior ghost = noteToHit.GetComponentInChildren<GhostBehavior>();
+
+            if (ghost != null)
             {
-                minDistance = dist;
-                nearestNote = note;
+                ghost.OnPlayerHitMe(); 
+
+                noteToHit.enabled = false;
+
+                mySensor.notesInRange.Remove(noteToHit);
+            }
+            else
+            {
+                Destroy(noteToHit.gameObject);
             }
         }
-
-        if (nearestNote != null)
+        else
         {
-            if (minDistance < hitWindow)
-            {
-                if (nearestNote.isNoteF == isInputF)
-                {
-                    HitSuccess();
-                    nearestNote.TriggerHit();
-                }
-                else HitFailed("WRONG!");
-            }
-            else HitFailed("TOO EARLY!");
+           
         }
     }
 
@@ -87,13 +92,25 @@ public class GameManager : MonoBehaviour
         popup.GetComponent<PopupText>().Setup(text, color);
     }
 
-    void HitSuccess()
+    void HitSuccess(bool isTypeF)
     {
         score += 100;
         combo++;
         ChangeHealth(heal);
         UpdateUI();
         ShowPopup("PERFECT!", Color.green);
+
+        if (hitSound != null) sfxSource.PlayOneShot(hitSound);
+
+        if (isTypeF)
+        {
+            if (enemyHurtSound != null) sfxSource.PlayOneShot(enemyHurtSound);
+        }
+        else
+        {
+            if (enemyHurtSoundSpecial != null) sfxSource.PlayOneShot(enemyHurtSoundSpecial);
+            else if (enemyHurtSound != null) sfxSource.PlayOneShot(enemyHurtSound);
+        }
     }
 
     void HitFailed(string message)
