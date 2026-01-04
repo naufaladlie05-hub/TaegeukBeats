@@ -1,16 +1,29 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; 
+using UnityEngine.SceneManagement;
 
 public class MainMenuManager : MonoBehaviour
 {
-    public void StartGame()
+    [Header("UI Panels")]
+    public GameObject helpPanel; 
+
+    public void PlayGame()
     {
-        SceneManager.LoadScene("Game");
+        SceneManager.LoadScene("Story_Intro");
     }
 
-    public void QuitApp()
+    public void OpenHelp()
     {
-        Debug.Log("Keluar dari Aplikasi...");
+        if (helpPanel != null) helpPanel.SetActive(true);
+    }
+
+    public void CloseHelp()
+    {
+        if (helpPanel != null) helpPanel.SetActive(false);
+    }
+
+    public void QuitGame()
+    {
+        Debug.Log("Quit Game");
         Application.Quit();
     }
 }

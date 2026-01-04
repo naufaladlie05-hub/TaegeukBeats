@@ -3,7 +3,6 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public GameManager myGameManager;
-
     private Animator myAnim; 
 
     void Start()
@@ -18,7 +17,6 @@ public class PlayerController : MonoBehaviour
             myGameManager.CheckHit(true);
 
             if (myAnim != null) myAnim.SetTrigger("hitF");
-
         }
 
         if (Input.GetKeyDown(KeyCode.J))

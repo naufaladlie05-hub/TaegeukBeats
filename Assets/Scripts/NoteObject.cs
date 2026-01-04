@@ -4,10 +4,10 @@ public class NoteObject : MonoBehaviour
 {
     public float speed = 10f;
     public bool isNoteF = true;
-
-    private GameManager gameManager;
     private bool hasReportedMiss = false;
-    private bool isHit = false; 
+    private bool isHit = false;
+    private GameManager gameManager;
+
 
     void Start()
     {
@@ -20,7 +20,7 @@ public class NoteObject : MonoBehaviour
 
         transform.position += Vector3.left * speed * Time.deltaTime;
 
-        if (transform.position.x < -7f && !hasReportedMiss)
+        if (transform.position.x < -7f && !hasReportedMiss) //hit fix
         {
             hasReportedMiss = true;
             if (gameManager != null) gameManager.NoteMissed();

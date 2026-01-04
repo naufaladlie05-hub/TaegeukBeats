@@ -28,8 +28,7 @@ public class HitSensor : MonoBehaviour
     public NoteObject GetHittableNote(bool isTypeF)
     {
         foreach (NoteObject note in notesInRange)
-        {
-           
+        {           
             if (note != null && note.gameObject.activeSelf && note.isNoteF == isTypeF)
             {
                 return note; 

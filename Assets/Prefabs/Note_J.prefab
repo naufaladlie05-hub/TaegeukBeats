@@ -83,7 +83,7 @@ PrefabInstance:
     - target: {fileID: 5713046560020972543, guid: 94ac50c220b03814c9db635e7241d930,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5713046560020972543, guid: 94ac50c220b03814c9db635e7241d930,
         type: 3}
@@ -178,6 +178,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d16233b0dcf48af4881259f041a9cd34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  idleAnimName: idle
+  hitAnimName: hit
+  attackAnimName: attack
+  dieAnimName: die
 --- !u!61 &5592123758885790312
 BoxCollider2D:
   m_ObjectHideFlags: 0

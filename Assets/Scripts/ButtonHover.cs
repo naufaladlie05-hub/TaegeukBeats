@@ -3,9 +3,9 @@ using UnityEngine.EventSystems;
 
 public class ButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Setting")]
+    [Header("Setting")] 
     public float hoverScale = 1.2f; 
-    public float speed = 15f;       
+    public float speed = 15f; 
 
     private Vector3 originalScale;  
     private Vector3 targetScale;    

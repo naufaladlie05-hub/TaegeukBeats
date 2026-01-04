@@ -1,37 +1,49 @@
 using UnityEngine;
-using TMPro; 
+using TMPro;
 
 public class PopupText : MonoBehaviour
 {
-    public float moveSpeed = 2f;
-    public float destroyTime = 1f;
+    public TextMeshPro textMesh;
+    public float moveSpeed = 3f;
+    public float destroyTime = 1f; 
+    public float fadeSpeed = 2f;   
 
-    private TextMeshPro textMesh;
     private Color textColor;
 
-    void Awake()
+    private void Awake()
     {
-        textMesh = GetComponent<TextMeshPro>();
-        textColor = textMesh.color;
+        if (textMesh == null)
+            textMesh = GetComponent<TextMeshPro>();
     }
 
-    void Start()
+
+    public void Setup(string text, Color color)
     {
-        Destroy(gameObject, destroyTime);
+        if (textMesh != null)
+        {
+            textMesh.text = text;
+
+            textColor = color;
+            textColor.a = 1f;
+
+            textMesh.color = textColor;
+        }
     }
+
 
     void Update()
     {
-        transform.position += Vector3.up * moveSpeed * Time.deltaTime;
+        transform.Translate(Vector3.up * moveSpeed * Time.deltaTime);
 
-        textColor.a -= Time.deltaTime / destroyTime;
-        textMesh.color = textColor;
-    }
+        if (textMesh != null)
+        {
+            textColor.a -= fadeSpeed * Time.deltaTime;
+            textMesh.color = textColor;
 
-    public void Setup(string message, Color color)
-    {
-        textMesh.text = message;
-        textMesh.color = color;
-        textColor = color; 
+            if (textColor.a <= 0)
+            {
+                Destroy(gameObject);
+            }
+        }
     }
 }

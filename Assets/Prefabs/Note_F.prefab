@@ -93,7 +93,7 @@ PrefabInstance:
     - target: {fileID: 5713046560020972543, guid: 94ac50c220b03814c9db635e7241d930,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5713046560020972543, guid: 94ac50c220b03814c9db635e7241d930,
         type: 3}
@@ -152,6 +152,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 8063997684697281870}
+    - targetCorrespondingSourceObject: {fileID: 1589731900504466081, guid: 94ac50c220b03814c9db635e7241d930,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3338865243554523488}
   m_SourcePrefab: {fileID: 100100000, guid: 94ac50c220b03814c9db635e7241d930, type: 3}
 --- !u!4 &767931077829182787 stripped
 Transform:
@@ -177,6 +181,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d16233b0dcf48af4881259f041a9cd34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  idleAnimName: idle
+  hitAnimName: hit
+  attackAnimName: attack
+  dieAnimName: die
 --- !u!61 &8063997684697281870
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -222,3 +230,24 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 3.01, y: 16.82}
   m_EdgeRadius: 0
+--- !u!95 &3338865243554523488
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6048105675412759581}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8bf98d39cc1b5c84294ef73970a45c47, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

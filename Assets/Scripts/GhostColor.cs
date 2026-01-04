@@ -3,7 +3,7 @@ using Spine.Unity;
 
 public class GhostColor : MonoBehaviour
 {
-    public Color myColor = Color.red; 
+    public Color myColor = Color.red; // spine manual color
 
     void Start()
     {
