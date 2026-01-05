@@ -1,8 +1,17 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
 
+/// <summary>
+/// Script utama yang mengatur alur permainan, skor, dan logika menang/kalah.
+/// Menggunakan pola Singleton dan Observer.
+/// </summary>
 public class GameManager : MonoBehaviour
 {
+    // Observer Pattern: Event untuk memberi tahu script lain (seperti UI) kalau data game berubah
+    public event Action<int, int, float, float> OnGameStateChanged;
+
+    // Singleton Pattern: Memastikan hanya ada satu GameManager dalam game
     public static GameManager instance;
 
     [Header("Gameplay References")]
@@ -14,19 +23,26 @@ public class GameManager : MonoBehaviour
     public AudioClip hitSound;
     public AudioClip enemyHurtSound;
     public AudioClip enemyHurtSoundSpecial;
-    
+
     [Header("Popup System")]
     public GameObject popupTextPrefab;
     public Transform popupSpawnPoint;
 
     [Header("Game Data")]
-    public int score = 0;
-    public int combo = 0;
-    public int maxCombo = 0;
-    public float currentHP = 100f;
-    public float maxHP = 100f;
-    public float damage = 20f;
-    public float heal = 5f;
+    // Encapsulation: Variable private, akses dari luar harus via Property
+    [SerializeField] private int score = 0;
+    [SerializeField] private int combo = 0;
+    [SerializeField] private int maxCombo = 0;
+    [SerializeField] private float currentHP = 100f;
+
+    // Property (Hanya bisa diambil nilainya/Read Only oleh script lain)
+    public int Score => score;
+    public int Combo => combo;
+    public float CurrentHP => currentHP;
+
+    [SerializeField] private float maxHP = 100f;
+    [SerializeField] private float damage = 20f;
+    [SerializeField] private float heal = 5f;
 
     public bool isGameOver = false;
     public bool isGamePaused = false;
@@ -35,25 +51,22 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        // optimize
+        // Optimasi frame rate biar smooth
         Application.targetFrameRate = 60;
         QualitySettings.vSyncCount = 0;
     }
 
-
-
-
-
-    // stat
+    // Inisialisasi status awal game
     void Start()
     {
         currentHP = maxHP;
         Time.timeScale = 1f;
 
+        // Cek apakah UIManager ada, kalau ada update tampilan awal
         if (UIManager.instance != null)
         {
             UIManager.instance.UpdateHUD(score, combo, currentHP, maxHP);
-            UIManager.instance.SetHelpPanel(true); 
+            UIManager.instance.SetHelpPanel(true);
             UIManager.instance.SetPausePanel(false);
         }
         else
@@ -62,16 +75,18 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
-
     void Update()
     {
+        // Tombol pause (ESC)
         if (Input.GetKeyDown(KeyCode.Escape) && hasStarted && !isGameOver)
         {
             TogglePause();
         }
     }
 
+    /// <summary>
+    /// Menutup panel bantuan dan memulai musik/gameplay.
+    /// </summary>
     public void CloseHelpAndStart()
     {
         if (UIManager.instance != null) UIManager.instance.SetHelpPanel(false);
@@ -84,6 +99,10 @@ public class GameManager : MonoBehaviour
         if (conductor != null) conductor.BeginGameplay();
     }
 
+    /// <summary>
+    /// Menghentikan atau melanjutkan game (Pause/Resume).
+    /// Mengatur TimeScale agar game berhenti total saat pause.
+    /// </summary>
     public void TogglePause()
     {
         isGamePaused = !isGamePaused;
@@ -107,18 +126,16 @@ public class GameManager : MonoBehaviour
         if (isGamePaused) TogglePause();
     }
 
-
-
-
-
-
-
-
-    // main/hit logic
+    /// <summary>
+    /// Logika utama untuk mengecek input pemain.
+    /// Memvalidasi apakah tombol yang ditekan sesuai dengan not yang ada di sensor.
+    /// </summary>
+    /// <param name="isInputF">True jika input F (atas), False jika input J (bawah)</param>
     public void CheckHit(bool isInputF)
     {
         if (isGameOver || isGamePaused || !hasStarted) return;
 
+        // Minta sensor mencarikan not yang valid
         NoteObject noteToHit = mySensor.GetHittableNote(isInputF);
 
         if (noteToHit != null)
@@ -126,6 +143,7 @@ public class GameManager : MonoBehaviour
             HitSuccess(isInputF);
             noteToHit.enabled = false;
 
+            // Handle animasi kematian not/musuh
             Animator anim = noteToHit.GetComponent<Animator>();
             if (mySensor.notesInRange.Contains(noteToHit))
                 mySensor.notesInRange.Remove(noteToHit);
@@ -137,6 +155,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
+                // Polymorphism: Memanggil method mati pada musuh (Ghost)
                 GhostBehavior ghost = noteToHit.GetComponentInChildren<GhostBehavior>();
                 if (ghost != null) ghost.OnPlayerHitMe();
                 Destroy(noteToHit.gameObject, (ghost != null) ? 1f : 0f);
@@ -144,15 +163,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
-
+    /// <summary>
+    /// Mengubah darah pemain dan memicu event update ke UI.
+    /// </summary>
     void ChangeHealth(float amount)
     {
         currentHP += amount;
         currentHP = Mathf.Clamp(currentHP, 0, maxHP);
 
-        if (UIManager.instance != null)
-            UIManager.instance.UpdateHUD(score, combo, currentHP, maxHP);
+        // Observer: Kabari semua subscriber (seperti UI) bahwa data berubah
+        OnGameStateChanged?.Invoke(score, combo, currentHP, maxHP);
 
         if (currentHP <= 0 && !isGameOver)
         {
@@ -160,9 +180,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // Dipanggil kalau pemain berhasil menekan not dengan tepat
     void HitSuccess(bool isTypeF)
     {
-        score += 100 + (combo * 10);
+        score += 100 + (combo * 10); // Skor bertambah sesuai combo
         combo++;
         if (combo > maxCombo) maxCombo = combo;
         ChangeHealth(heal);
@@ -171,14 +192,19 @@ public class GameManager : MonoBehaviour
         PlayHitSound(isTypeF);
     }
 
+    /// <summary>
+    /// Dipanggil otomatis oleh not jika not tersebut lewat tanpa ditekan.
+    /// </summary>
     public void NoteMissed()
     {
         if (!isGameOver && hasStarted)
         {
-            combo = 0;
+            combo = 0; // Reset combo
             ChangeHealth(-damage);
-
             ShowPopup("MISS!", Color.red);
+
+            // Update UI via event
+            OnGameStateChanged?.Invoke(score, combo, currentHP, maxHP);
         }
     }
 
@@ -192,26 +218,13 @@ public class GameManager : MonoBehaviour
         if (UIManager.instance != null) UIManager.instance.TriggerGameOverAnim();
     }
 
-
-
-
-
+    // Memunculkan teks efek (seperti "Perfect" atau "Miss") di layar
     public void ShowPopup(string text, Color color)
     {
         if (popupTextPrefab != null)
         {
             GameObject spawnTarget = GameObject.Find("PopupSpawnPoint");
-
-            Vector3 spawnPos = Vector3.zero;
-
-            if (spawnTarget != null)
-            {
-                spawnPos = spawnTarget.transform.position;
-            }
-            else
-            {
-                spawnPos = new Vector3(-6f, 2f, 0f);
-            }
+            Vector3 spawnPos = (spawnTarget != null) ? spawnTarget.transform.position : new Vector3(-6f, 2f, 0f);
 
             GameObject popup = Instantiate(popupTextPrefab, spawnPos, Quaternion.identity);
 
@@ -227,26 +240,21 @@ public class GameManager : MonoBehaviour
         else if (!isTypeF && enemyHurtSoundSpecial != null) sfxSource.PlayOneShot(enemyHurtSoundSpecial);
     }
 
-
-
-
-
-
-
+    /// <summary>
+    /// Menghitung rank akhir berdasarkan skor dan menampilkannya.
+    /// </summary>
     public void ShowResults()
     {
         if (isGameOver) return;
         isGameOver = true;
 
         string rank = "D";
-        Color rankColor = Color.white; 
+        Color rankColor = Color.white;
 
+        // Logika penentuan rank
         if (score >= 3500) { rank = "S"; rankColor = Color.yellow; }
-
         else if (score >= 3000) { rank = "A"; rankColor = Color.green; }
-
         else if (score >= 1500) { rank = "B"; rankColor = Color.cyan; }
-
         else { rank = "C"; rankColor = Color.grey; }
 
         if (UIManager.instance != null)
@@ -264,6 +272,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
     }
+
     public void QuitGame()
     {
         Application.Quit();

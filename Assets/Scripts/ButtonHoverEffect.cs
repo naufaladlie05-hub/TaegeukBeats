@@ -1,12 +1,15 @@
 using UnityEngine;
-using UnityEngine.EventSystems; 
-using TMPro; 
+using UnityEngine.EventSystems;
+using TMPro;
 
+/// <summary>
+/// Memberikan efek membesar (scaling) pada tombol saat kursor mouse diarahkan (Hover).
+/// </summary>
 public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public TextMeshProUGUI textTarget; 
-    public float scaleSize = 1.2f;     
-    public float speed = 15f;          
+    public TextMeshProUGUI textTarget;
+    public float scaleSize = 1.2f;
+    public float speed = 15f;
 
     private Vector3 originalScale;
     private Vector3 targetScale;
@@ -16,7 +19,7 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
         if (textTarget != null)
         {
             originalScale = textTarget.transform.localScale;
-            targetScale = originalScale; 
+            targetScale = originalScale;
         }
     }
 

@@ -1,6 +1,9 @@
 using UnityEngine;
-using UnityEngine.EventSystems; 
+using UnityEngine.EventSystems;
 
+/// <summary>
+/// Memberikan efek membesar (scaling) pada tombol saat kursor mouse diarahkan (Hover).
+/// </summary>
 public class ButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Setting")] 
